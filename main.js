@@ -6,6 +6,7 @@ const btn_bubble_sort = document.getElementById("btn-bubble-sort");
 const range_num_bars = document.getElementById("num-bars-range");
 const hovered_bar_div = document.getElementById("bar-value-div");
 const hovered_bar_span = document.getElementById("bar-value");
+const btn_stop_sort = document.getElementById("btn-stop-sort");
 
 let is_sorting = false;
 
@@ -40,7 +41,7 @@ function onload() {
         const barIndex = Math.floor(x / barWidth);
         const barHeight = uniqueHeights[barIndex];
         const barX = barIndex * barWidth;
-        const barY = canvasHeight - (barHeight / 100) * canvasHeight;
+        const barY = canvasHeight - (barHeight / uniqueHeights.length) * canvasHeight;
 
         if (barIndex != hoveredBarIndex) {
             draw();
@@ -50,9 +51,8 @@ function onload() {
 
         hovered_bar_span.innerText = barHeight;
 
-        // Draw the bar in red
         ctx.fillStyle = "red";
-        ctx.fillRect(barX, barY, barWidth, (barHeight / 100) * canvasHeight);
+        ctx.fillRect(barX, barY, barWidth, (barHeight / uniqueHeights.length) * canvasHeight);
     });
 
     canvas.addEventListener("mouseleave", () => {
@@ -77,6 +77,11 @@ function onload() {
         uniqueHeights.length = event.target.value;
         randomize();
     });
+
+    btn_stop_sort.addEventListener("click", () => {
+        is_sorting = false;
+        enable_elements();
+    });
 }
 
 function draw() {
@@ -94,20 +99,15 @@ function draw() {
         // Draw the bars
         uniqueHeights.forEach((barHeight, index) => {
             const x = index * barWidth;
-            const y = canvasHeight - (barHeight / 100) * canvasHeight;
+            const y = canvasHeight - (barHeight / uniqueHeights.length) * canvasHeight;
 
             ctx.fillStyle = "black";
-            ctx.fillRect(x, y, barWidth, (barHeight / 100) * canvasHeight);
+            ctx.fillRect(x, y, barWidth, (barHeight / uniqueHeights.length) * canvasHeight);
         });
     }
 }
 
 function randomize() {
-    // for (let i = uniqueHeights.length - 1; i > 0; i--) {
-    //     const j = Math.floor(Math.random() * (i + 1));
-    //     [uniqueHeights[i], uniqueHeights[j]] = [uniqueHeights[j], uniqueHeights[i]];
-    // }
-
     // Create an array with values from 1 to n
     uniqueHeights = Array.from({ length: uniqueHeights.length }, (_, index) => index + 1);
 
@@ -130,14 +130,19 @@ async function bubbleSort() {
     n = uniqueHeights.length;
     for(let i = 0; i < n; i++) {
         for(let j = 0; j < n - i - 1; j++) {
+            if (!is_sorting) {
+                draw();
+                return;
+            }
+
             let a = uniqueHeights[j];
             let b = uniqueHeights[j + 1];
 
             // Change color of the bars being compared
             ctx.fillStyle = "blue";
             const barWidth = canvasWidth / uniqueHeights.length;
-            ctx.fillRect(j * barWidth, canvasHeight - (a / 100) * canvasHeight, barWidth, (a / 100) * canvasHeight);
-            ctx.fillRect((j + 1) * barWidth, canvasHeight - (b / 100) * canvasHeight, barWidth, (b / 100) * canvasHeight);
+            ctx.fillRect(j * barWidth, canvasHeight - (a / uniqueHeights.length) * canvasHeight, barWidth, (a / uniqueHeights.length) * canvasHeight);
+            ctx.fillRect((j + 1) * barWidth, canvasHeight - (b / uniqueHeights.length) * canvasHeight, barWidth, (b / uniqueHeights.length) * canvasHeight);
 
             // Apply delay
             const delay = document.getElementById("sort-delay-range").value;
@@ -145,8 +150,8 @@ async function bubbleSort() {
 
             if(a > b) {
                 [uniqueHeights[j], uniqueHeights[j + 1]] = [b, a];
-                draw();
             }
+            draw();
         }
     }
     sort_end();
@@ -154,9 +159,7 @@ async function bubbleSort() {
 
 function sort_start() {
     is_sorting = true;
-    btn_randomize.disabled = true;
-    btn_bubble_sort.disabled = true;
-    range_num_bars.disabled = true;
+    disable_elements();
 }
 
 async function sort_end() {
@@ -166,16 +169,28 @@ async function sort_end() {
 
         const barWidth = canvasWidth / uniqueHeights.length;
         ctx.fillStyle = "green";
-        ctx.fillRect(i * barWidth, canvasHeight - (uniqueHeights[i] / 100) * canvasHeight, barWidth, (uniqueHeights[i] / 100) * canvasHeight);
+        ctx.fillRect(i * barWidth, canvasHeight - (uniqueHeights[i] / uniqueHeights.length) * canvasHeight, barWidth, (uniqueHeights[i] / uniqueHeights.length) * canvasHeight);
     }
 
     await new Promise(r => setTimeout(r, 1000));
 
     draw();
+    enable_elements();
+}
+
+function disable_elements() {
+    btn_randomize.disabled = true;
+    btn_bubble_sort.disabled = true;
+    range_num_bars.disabled = true;
+    btn_stop_sort.disabled = false;
+}
+
+function enable_elements() {
     is_sorting = false;
     btn_randomize.disabled = false;
     btn_bubble_sort.disabled = false;
     range_num_bars.disabled = false;
+    btn_stop_sort.disabled = true;
 }
 
 document.getElementById("debug").addEventListener("click", () => {
