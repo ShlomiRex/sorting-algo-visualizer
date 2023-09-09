@@ -7,6 +7,7 @@ const range_num_bars = document.getElementById("num-bars-range");
 const hovered_bar_div = document.getElementById("bar-value-div");
 const hovered_bar_span = document.getElementById("bar-value");
 const btn_stop_sort = document.getElementById("btn-stop-sort");
+const btn_insertion_sort = document.getElementById("btn-insertion-sort");
 
 let is_sorting = false;
 
@@ -25,6 +26,8 @@ function onload() {
     var hoveredBarIndex = -1;
 
     canvas.addEventListener("mouseenter", () => {
+        if(is_sorting)
+            return;
         hovered_bar_div.style.opacity = "1";
     });
     
@@ -71,6 +74,10 @@ function onload() {
     btn_bubble_sort.addEventListener("click", () => {
         bubbleSort();
     });
+
+    btn_insertion_sort.addEventListener("click", () => {
+        insertion_sort();
+    });
     
     // Add value change listener to slider
     document.getElementById("num-bars-range").addEventListener("input", (event) => {
@@ -82,6 +89,12 @@ function onload() {
         is_sorting = false;
         enable_elements();
     });
+}
+
+function draw_bar(index, color) {
+    const barWidth = canvasWidth / uniqueHeights.length;
+    ctx.fillStyle = color;
+    ctx.fillRect(index * barWidth, canvasHeight - (uniqueHeights[index] / uniqueHeights.length) * canvasHeight, barWidth, (uniqueHeights[index] / uniqueHeights.length) * canvasHeight);
 }
 
 function draw() {
@@ -123,7 +136,6 @@ function randomize() {
 async function bubbleSort() {
     if (is_sorting)
         return;
-    console.log("Bubble sort started");
 
     sort_start();
 
@@ -139,10 +151,8 @@ async function bubbleSort() {
             let b = uniqueHeights[j + 1];
 
             // Change color of the bars being compared
-            ctx.fillStyle = "blue";
-            const barWidth = canvasWidth / uniqueHeights.length;
-            ctx.fillRect(j * barWidth, canvasHeight - (a / uniqueHeights.length) * canvasHeight, barWidth, (a / uniqueHeights.length) * canvasHeight);
-            ctx.fillRect((j + 1) * barWidth, canvasHeight - (b / uniqueHeights.length) * canvasHeight, barWidth, (b / uniqueHeights.length) * canvasHeight);
+            draw_bar(j, "blue");
+            draw_bar(j + 1, "blue");
 
             // Apply delay
             const delay = document.getElementById("sort-delay-range").value;
@@ -167,9 +177,7 @@ async function sort_end() {
         const delay = document.getElementById("sort-delay-range").value;
         await new Promise(r => setTimeout(r, delay));
 
-        const barWidth = canvasWidth / uniqueHeights.length;
-        ctx.fillStyle = "green";
-        ctx.fillRect(i * barWidth, canvasHeight - (uniqueHeights[i] / uniqueHeights.length) * canvasHeight, barWidth, (uniqueHeights[i] / uniqueHeights.length) * canvasHeight);
+        draw_bar(i, "green");
     }
 
     await new Promise(r => setTimeout(r, 1000));
@@ -183,6 +191,8 @@ function disable_elements() {
     btn_bubble_sort.disabled = true;
     range_num_bars.disabled = true;
     btn_stop_sort.disabled = false;
+    btn_insertion_sort.disabled = true;
+    hovered_bar_div.style.opacity = "0";
 }
 
 function enable_elements() {
@@ -191,10 +201,50 @@ function enable_elements() {
     btn_bubble_sort.disabled = false;
     range_num_bars.disabled = false;
     btn_stop_sort.disabled = true;
+    btn_insertion_sort.disabled = false;
+}
+
+async function insertion_sort() {
+    if (is_sorting)
+        return;
+
+    sort_start();
+
+    for (let i = 1; i < uniqueHeights.length; i++) {
+        let key = uniqueHeights[i];
+        let j = i - 1;
+
+        while (j >= 0 && uniqueHeights[j] > key) {
+            if (!is_sorting) {
+                draw();
+                return;
+            }
+
+            // Change color of the bars being compared
+            draw_bar(j, "blue");
+            draw_bar(j+1, "blue");
+            draw_bar(i, "red");
+
+            // Apply delay
+            const delay = document.getElementById("sort-delay-range").value;
+            await new Promise(r => setTimeout(r, delay));
+
+            uniqueHeights[j + 1] = uniqueHeights[j];
+            j = j - 1;
+
+            draw();
+        }
+        draw_bar(j+1, "green");
+        const delay = document.getElementById("sort-delay-range").value;
+        await new Promise(r => setTimeout(r, delay));
+        uniqueHeights[j + 1] = key;
+        draw();
+    }
+
+    sort_end();
 }
 
 document.getElementById("debug").addEventListener("click", () => {
-    console.log(uniqueHeights);
 });
 
 window.addEventListener("load", onload);
