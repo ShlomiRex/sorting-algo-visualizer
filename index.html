@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <button id="btn-randomize">Randomize</button>
+    <button id="btn-bubble-sort">Bubble sort</button>
+    <div id="sliders">
+        <div>
+            <label for="sort-delay-range">Sort delay (ms)</label>
+            <input type="range" min="1" max="1000" value="500" class="slider" id="sort-delay-range" oninput="this.nextElementSibling.value = this.value">
+            <output>500</output>
+        </div>
+        <div>
+            <label for="num-bars-range">Bars</label>
+            <input type="range" min="10" max="1000" value="100" class="slider" id="num-bars-range" oninput="this.nextElementSibling.value = this.value">
+            <output>100</output>
+        </div>
+    </div>
+    <button id="debug">Debug</button>
+    <br>
+    <canvas id="canvas" width="800" height="400"></canvas>
+    <div id="bar-value-div">
+        Value: <span id="bar-value">0</span>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
