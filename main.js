@@ -10,6 +10,9 @@ const btn_stop_sort = document.getElementById("btn-stop-sort");
 const btn_insertion_sort = document.getElementById("btn-insertion-sort");
 const btn_merge_sort = document.getElementById("btn-merge-sort");
 
+
+var audioContext;
+
 let is_sorting = false;
 
 function onload() {
@@ -159,6 +162,10 @@ async function bubbleSort() {
             draw_bar(j, "blue");
             draw_bar(j + 1, "blue");
 
+            // Apply sound effect
+            play_sound(j);
+            //play_sound(j+1);
+
             // Apply delay
             const delay = document.getElementById("sort-delay-range").value;
             await new Promise(r => setTimeout(r, delay));
@@ -182,6 +189,7 @@ async function sort_end() {
         const delay = document.getElementById("sort-delay-range").value;
         await new Promise(r => setTimeout(r, delay));
 
+        play_sound(i);
         draw_bar(i, "green");
     }
 
@@ -350,6 +358,29 @@ async function merge_sort() {
     sort_end();
 }
 
+function play_sound(arr_index) {
+    // Create an AudioContext
+    if (audioContext == null)
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.type = 'square'; // 8-bit-like square wave
+    oscillator.frequency.setValueAtTime(
+        //Math.random() * 2000 + 500, // Random frequency between 500 and 2500 Hz
+        uniqueHeights[arr_index] * 10,
+        audioContext.currentTime
+    );
+
+    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Set the volume
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.01); // Play for 10ms
+}
+
 document.getElementById("debug").addEventListener("click", () => {
     // Create an AudioContext
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -382,7 +413,7 @@ document.getElementById("debug").addEventListener("click", () => {
     }
 
     // Call the function to play a burst of 8-bit sounds (adjust the burst length as needed)
-    playBurstOfSounds(10); // Play 10 random sounds
+    playBurstOfSounds(100); // Play 10 random sounds
 
 });
 
