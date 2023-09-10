@@ -446,6 +446,71 @@ async function selection_sort() {
     sort_end();
 }
 
+async function quick_sort() {
+    if (is_sorting) {
+        return;
+    }
+
+    sort_start();
+
+    async function partition(low, high) {
+        const pivot = uniqueHeights[high];
+        let i = low - 1;
+
+        for (let j = low; j <= high - 1; j++) {
+            if (!is_sorting) {
+                draw();
+                return;
+            }
+
+            // Change color of the bars being compared
+            draw_bar(i, "blue");
+            draw_bar(j, "blue");
+            draw_bar(low, "red");
+            draw_bar(high, "red");
+
+            // Apply sound effect
+            play_sound(j);
+
+            // Apply delay
+            const delay = document.getElementById("sort-delay-range").value;
+            await new Promise(r => setTimeout(r, delay));
+
+            if (uniqueHeights[j] < pivot) {
+                i++;
+                [uniqueHeights[i], uniqueHeights[j]] = [uniqueHeights[j], uniqueHeights[i]];
+                draw_bar(i, "green");
+                draw_bar(j, "green");
+            }
+            draw();
+        }
+
+        [uniqueHeights[i + 1], uniqueHeights[high]] = [uniqueHeights[high], uniqueHeights[i + 1]];
+        return i + 1;
+    }
+
+    async function quickSortHelper(low, high) {
+        if (!is_sorting) {
+            draw();
+            return;
+        }
+        if (low < high) {
+            const pivotIndex = await partition(low, high);
+
+            await quickSortHelper(low, pivotIndex - 1);
+            await quickSortHelper(pivotIndex + 1, high);
+        }
+    }
+
+    await quickSortHelper(0, uniqueHeights.length - 1);
+
+    if (!is_sorting) {
+        draw();
+        return;
+    }
+    sort_end();
+}
+
 document.getElementById("debug").addEventListener("click", () => {
     // Create an AudioContext
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
