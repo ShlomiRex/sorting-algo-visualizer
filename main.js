@@ -9,7 +9,8 @@ const hovered_bar_span = document.getElementById("bar-value");
 const btn_stop_sort = document.getElementById("btn-stop-sort");
 const btn_insertion_sort = document.getElementById("btn-insertion-sort");
 const btn_merge_sort = document.getElementById("btn-merge-sort");
-
+const btn_selection_sort = document.getElementById("btn-selection-sort");
+const btn_quick_sort = document.getElementById("btn-quick-sort");
 
 var audioContext;
 
@@ -85,6 +86,14 @@ function onload() {
 
     btn_merge_sort.addEventListener("click", () => {
         merge_sort();
+    });
+
+    btn_selection_sort.addEventListener("click", () => {
+        selection_sort();
+    });
+
+    btn_quick_sort.addEventListener("click", () => {
+        quick_sort();
     });
 
     // Add value change listener to slider
@@ -207,6 +216,8 @@ function disable_elements() {
     btn_insertion_sort.disabled = true;
     hovered_bar_div.style.opacity = "0";
     btn_merge_sort.disabled = true;
+    btn_selection_sort.disabled = true;
+    btn_quick_sort.disabled = true;
 }
 
 function enable_elements() {
@@ -217,6 +228,8 @@ function enable_elements() {
     btn_stop_sort.disabled = true;
     btn_insertion_sort.disabled = false;
     btn_merge_sort.disabled = false;
+    btn_selection_sort.disabled = false;
+    btn_quick_sort.disabled = false;
 }
 
 async function insertion_sort() {
@@ -348,6 +361,10 @@ async function merge_sort() {
 
     async function mergeSortHelper(arr, l, r) {
         if (l < r) {
+            if (!is_sorting) {
+                draw();
+                return;
+            }
             const m = Math.floor((l + r) / 2);
 
             await mergeSortHelper(arr, l, m);
@@ -372,7 +389,7 @@ function play_sound(arr_index) {
     oscillator.type = 'square'; // 8-bit-like square wave
     oscillator.frequency.setValueAtTime(
         //Math.random() * 2000 + 500, // Random frequency between 500 and 2500 Hz
-        uniqueHeights[arr_index] * 10,
+        uniqueHeights[arr_index] / uniqueHeights.length * 1000,
         audioContext.currentTime
     );
 
@@ -383,6 +400,50 @@ function play_sound(arr_index) {
 
     oscillator.start();
     oscillator.stop(audioContext.currentTime + 0.01); // Play for 10ms
+}
+
+async function selection_sort() {
+    if (is_sorting) {
+        return;
+    }
+
+    sort_start();
+
+    const n = uniqueHeights.length;
+
+    for (let i = 0; i < n - 1; i++) {
+        let minIndex = i;
+
+        for (let j = i + 1; j < n; j++) {
+            if (!is_sorting) {
+                draw();
+                return;
+            }
+
+            // Change color of the bars being compared
+            draw_bar(j, "blue");
+            draw_bar(minIndex, "blue");
+
+            // Apply sound effect
+            play_sound(j);
+            //play_sound(minIndex);
+
+            // Apply delay
+            const delay = document.getElementById("sort-delay-range").value;
+            await new Promise(r => setTimeout(r, delay));
+
+            if (uniqueHeights[j] < uniqueHeights[minIndex]) {
+                minIndex = j;
+            }
+            draw();
+        }
+
+        // Swap the elements
+        [uniqueHeights[i], uniqueHeights[minIndex]] = [uniqueHeights[minIndex], uniqueHeights[i]];
+        draw_bar(i, "green");
+    }
+
+    sort_end();
 }
 
 document.getElementById("debug").addEventListener("click", () => {
