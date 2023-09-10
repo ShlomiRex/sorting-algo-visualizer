@@ -240,6 +240,9 @@ async function insertion_sort() {
             draw_bar(j + 1, "blue");
             draw_bar(i, "red");
 
+            // Apply sound effect
+            play_sound(j);
+
             // Apply delay
             const delay = document.getElementById("sort-delay-range").value;
             await new Promise(r => setTimeout(r, delay));
@@ -298,6 +301,7 @@ async function merge_sort() {
             }
 
             draw_bar(k, "blue");
+            play_sound(k);
             const delay = document.getElementById("sort-delay-range").value;
             await new Promise(r => setTimeout(r, delay));
 
