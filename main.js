@@ -11,6 +11,9 @@ const btn_insertion_sort = document.getElementById("btn-insertion-sort");
 const btn_merge_sort = document.getElementById("btn-merge-sort");
 const btn_selection_sort = document.getElementById("btn-selection-sort");
 const btn_quick_sort = document.getElementById("btn-quick-sort");
+const btn_heap_sort = document.getElementById("btn-heap-sort");
+const btn_radix_sort = document.getElementById("btn-radix-sort");
+const btn_shell_sort = document.getElementById("btn-shell-sort");
 
 var audioContext;
 
@@ -94,6 +97,18 @@ function onload() {
 
     btn_quick_sort.addEventListener("click", () => {
         quick_sort();
+    });
+
+    btn_heap_sort.addEventListener("click", () => {
+        heap_sort();
+    });
+
+    btn_radix_sort.addEventListener("click", () => {
+        radix_sort();
+    });
+
+    btn_shell_sort.addEventListener("click", () => {
+        shell_sort();
     });
 
     // Add value change listener to slider
@@ -218,6 +233,9 @@ function disable_elements() {
     btn_merge_sort.disabled = true;
     btn_selection_sort.disabled = true;
     btn_quick_sort.disabled = true;
+    btn_heap_sort.disabled = true;
+    btn_radix_sort.disabled = true;
+    btn_shell_sort.disabled = true;
 }
 
 function enable_elements() {
@@ -230,6 +248,9 @@ function enable_elements() {
     btn_merge_sort.disabled = false;
     btn_selection_sort.disabled = false;
     btn_quick_sort.disabled = false;
+    btn_heap_sort.disabled = false;
+    btn_radix_sort.disabled = false;
+    btn_shell_sort.disabled = false;
 }
 
 async function insertion_sort() {
@@ -508,6 +529,95 @@ async function quick_sort() {
         draw();
         return;
     }
+    sort_end();
+}
+
+async function heap_sort() {
+    if (is_sorting) {
+        return;
+    }
+
+    sort_start();
+
+    async function heapify(n, i) {
+        let largest = i;
+        const left = 2 * i + 1;
+        const right = 2 * i + 2;
+
+        draw_bar(left, "blue");
+        draw_bar(right, "blue");
+
+        if (left < n && uniqueHeights[left] > uniqueHeights[largest]) {
+            largest = left;
+        }
+
+        if (right < n && uniqueHeights[right] > uniqueHeights[largest]) {
+            largest = right;
+        }
+
+        draw_bar(largest, "red");
+        
+        // Apply sound effect
+        play_sound(i);
+
+        // Apply delay
+        const delay = document.getElementById("sort-delay-range").value;
+        await new Promise(r => setTimeout(r, delay));
+
+        draw();
+        
+        if (largest !== i) {
+            if (!is_sorting) {
+                draw();
+                return;
+            }
+
+            // Swap elements
+            [uniqueHeights[i], uniqueHeights[largest]] = [uniqueHeights[largest], uniqueHeights[i]];
+            draw_bar(i, "green");
+            draw_bar(largest, "green");
+
+            // Recursively heapify the affected sub-tree
+            await heapify(n, largest);
+        }
+    }
+
+    async function heapSortHelper() {
+        const n = uniqueHeights.length;
+
+        // Build the max heap
+        for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+            await heapify(n, i);
+        }
+
+        // Extract elements from the heap one by one
+        for (let i = n - 1; i >= 0; i--) {
+            if (!is_sorting) {
+                draw();
+                return;
+            }
+
+            // Change color of the bars being compared
+            draw_bar(0, "blue");
+            draw_bar(i, "blue");
+
+            // Apply sound effect
+            play_sound(0);
+
+            // Apply delay
+            const delay = document.getElementById("sort-delay-range").value;
+            await new Promise(r => setTimeout(r, delay));
+
+            // Swap elements
+            [uniqueHeights[0], uniqueHeights[i]] = [uniqueHeights[i], uniqueHeights[0]];
+
+            // Heapify the reduced heap
+            await heapify(i, 0);
+        }
+    }
+
+    await heapSortHelper();
+
     sort_end();
 }
 
