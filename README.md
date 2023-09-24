@@ -1,6 +1,8 @@
 # sorting-algo-website
 A website that visualizes sorting algorithms.
 
-![](README-assets/Screenshot%202023-09-24%20155437.png)
+It comes with a nice sound effect too!
 
-![](README-assets/Screenshot%202023-09-24%20155311.png)
+Get it at [my website](https://shlomirex.github.io/sorting-algo-visualizer/)
+
+![](README-assets/animation.gif)
