@@ -13,7 +13,6 @@ const btn_selection_sort = document.getElementById("btn-selection-sort");
 const btn_quick_sort = document.getElementById("btn-quick-sort");
 const btn_heap_sort = document.getElementById("btn-heap-sort");
 const btn_radix_sort = document.getElementById("btn-radix-sort");
-const btn_shell_sort = document.getElementById("btn-shell-sort");
 const btn_debug = document.getElementById("debug");
 
 var canvasWidth, canvasHeight;
@@ -113,10 +112,6 @@ function onload() {
 
     btn_radix_sort.addEventListener("click", () => {
         radix_sort();
-    });
-
-    btn_shell_sort.addEventListener("click", () => {
-        shell_sort();
     });
 
     // Add value change listener to slider
@@ -241,7 +236,6 @@ function disable_elements() {
     btn_quick_sort.disabled = true;
     btn_heap_sort.disabled = true;
     btn_radix_sort.disabled = true;
-    btn_shell_sort.disabled = true;
 }
 
 function enable_elements() {
@@ -256,7 +250,6 @@ function enable_elements() {
     btn_quick_sort.disabled = false;
     btn_heap_sort.disabled = false;
     btn_radix_sort.disabled = false;
-    btn_shell_sort.disabled = false;
 }
 
 async function insertion_sort() {
