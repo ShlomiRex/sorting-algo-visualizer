@@ -413,12 +413,10 @@ function play_sound(arr_index) {
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
+    // Frequency is proportional to the height of the bar
     oscillator.type = 'square'; // 8-bit-like square wave
-    oscillator.frequency.setValueAtTime(
-        //Math.random() * 2000 + 500, // Random frequency between 500 and 2500 Hz
-        uniqueHeights[arr_index] / uniqueHeights.length * 1000,
-        audioContext.currentTime
-    );
+    const frequency = uniqueHeights[arr_index] / uniqueHeights.length * 1000;
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
 
     // Get volume
     var volume = document.getElementById("volume-range").value;
@@ -630,6 +628,77 @@ async function heap_sort() {
     sort_end();
 }
 
+async function radix_sort() {
+    if (is_sorting)
+        return;
+
+    sort_start();
+
+    const maxNum = Math.max(...uniqueHeights);
+    const maxDigitCount = Math.floor(Math.log10(maxNum)) + 1;
+
+    for (let i = 0; i < maxDigitCount; i++) {
+        const buckets = Array.from({ length: 10 }, () => []);
+
+        for (let j = 0; j < uniqueHeights.length; j++) {
+            if (!is_sorting) {
+                draw();
+                return;
+            }
+
+            const num = uniqueHeights[j];
+            const digit = Math.floor((num / Math.pow(10, i)) % 10);
+            buckets[digit].push(num);
+
+            // Change color of the bars being compared
+            draw_bar(j, "blue");
+            play_sound(j);
+
+            // Apply delay
+            const delay = document.getElementById("sort-delay-range").value;
+            await new Promise(r => setTimeout(r, delay));
+
+            draw();
+        }
+
+        // Reconstruct the array from the buckets
+        let k = 0;
+        for (let j = 0; j < 10; j++) {
+            while (buckets[j].length > 0) {
+                if (!is_sorting) {
+                    draw();
+                    return;
+                }
+
+                draw_bar(j, "red");
+                play_sound(j);
+
+                draw_bar(k, "green");
+                play_sound(k);
+
+                // Apply delay
+                const delay = document.getElementById("sort-delay-range").value;
+                await new Promise(r => setTimeout(r, delay));
+
+                uniqueHeights[k] = buckets[j].shift();
+
+                k++;
+                draw();
+            }
+        }
+    }
+
+    sort_end();
+}
+
+function onresize() {
+    canvasWidth = canvas.scrollWidth;
+    canvasHeight = canvas.scrollHeight;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    draw();
+}
+
 if (btn_debug != null) {
     btn_debug.addEventListener("click", () => {
         // Create an AudioContext
@@ -669,3 +738,4 @@ if (btn_debug != null) {
 }
 
 window.addEventListener("load", onload);
+window.addEventListener("resize", onresize);

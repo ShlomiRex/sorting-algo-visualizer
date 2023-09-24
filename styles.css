@@ -3,13 +3,10 @@
   transition: opacity 0.3s ease-in-out; /* Add a transition effect */
 }
 
-#sliders {
+.sliders {
   display: flex;
   flex-flow: row;
-}
-
-#sliders > div {
-  margin-right: 10px;
+  gap: 30px;
 }
 
 :root {

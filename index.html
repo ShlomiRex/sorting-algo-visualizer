@@ -13,13 +13,14 @@
     <p>Shlomi Domnenko</p>
 
     <div>
-        <button id="btn-randomize">Randomize</button>
-        <button id="btn-stop-sort" disabled>Stop</button>
+        <button id="btn-randomize" title="Randomize the bars' height">Randomize</button>
+        <button id="btn-stop-sort" title="Stop the current running algorithm" disabled>Stop</button>
     </div>
 
     <br>
 
-    <div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        Select algorithm:
         <button id="btn-bubble-sort">Bubble sort</button>
         <button id="btn-insertion-sort">Insertion sort</button>
         <button id="btn-merge-sort">Merge sort</button>
@@ -32,7 +33,7 @@
     
     <br>
 
-    <div id="sliders">
+    <div class="sliders">
         <div>
             <label for="sort-delay-range">Sort delay (ms)</label>
             <input type="range" min="1" max="1000" value="500" class="slider" id="sort-delay-range" oninput="this.nextElementSibling.value = this.value">
