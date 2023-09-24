@@ -14,6 +14,9 @@ const btn_quick_sort = document.getElementById("btn-quick-sort");
 const btn_heap_sort = document.getElementById("btn-heap-sort");
 const btn_radix_sort = document.getElementById("btn-radix-sort");
 const btn_shell_sort = document.getElementById("btn-shell-sort");
+const btn_debug = document.getElementById("debug");
+
+var canvasWidth, canvasHeight;
 
 var audioContext;
 
@@ -21,8 +24,13 @@ let is_sorting = false;
 
 function onload() {
     ctx = canvas.getContext("2d");
-    canvasWidth = canvas.width;
-    canvasHeight = canvas.height;
+
+    canvasWidth = canvas.scrollWidth;
+    canvasHeight = canvas.scrollHeight;
+
+    // For some reason, the canvas width is different from scrollWidth.
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
 
     for (let i = uniqueHeights.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -125,29 +133,27 @@ function onload() {
 
 function draw_bar(index, color) {
     const barWidth = canvasWidth / uniqueHeights.length;
+    const barHeight = uniqueHeights[index];
+
+    const x = index * barWidth;
+    const y = canvasHeight - (barHeight / uniqueHeights.length) * canvasHeight;
+    const w = barWidth;
+    const h = (barHeight / uniqueHeights.length) * canvasHeight;
+
     ctx.fillStyle = color;
-    ctx.fillRect(index * barWidth, canvasHeight - (uniqueHeights[index] / uniqueHeights.length) * canvasHeight, barWidth, (uniqueHeights[index] / uniqueHeights.length) * canvasHeight);
+    ctx.fillRect(x, y, w, h);
 }
 
 function draw() {
     if (canvas.getContext) {
         const ctx = canvas.getContext("2d");
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-
-        // Calculate the width of each bar
-        const barWidth = canvasWidth / uniqueHeights.length;
 
         // Clear the canvas
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
         // Draw the bars
-        uniqueHeights.forEach((barHeight, index) => {
-            const x = index * barWidth;
-            const y = canvasHeight - (barHeight / uniqueHeights.length) * canvasHeight;
-
-            ctx.fillStyle = "black";
-            ctx.fillRect(x, y, barWidth, (barHeight / uniqueHeights.length) * canvasHeight);
+        uniqueHeights.forEach((_, index) => {
+            draw_bar(index, "black");
         });
     }
 }
@@ -414,7 +420,10 @@ function play_sound(arr_index) {
         audioContext.currentTime
     );
 
-    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Set the volume
+    // Get volume
+    var volume = document.getElementById("volume-range").value;
+    volume = volume / 100;
+    gainNode.gain.setValueAtTime(volume, audioContext.currentTime); // Set the volume
 
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
@@ -443,7 +452,7 @@ async function selection_sort() {
 
             // Change color of the bars being compared
             draw_bar(j, "blue");
-            draw_bar(minIndex, "blue");
+            draw_bar(minIndex, "red");
 
             // Apply sound effect
             play_sound(j);
@@ -556,7 +565,7 @@ async function heap_sort() {
         }
 
         draw_bar(largest, "red");
-        
+
         // Apply sound effect
         play_sound(i);
 
@@ -565,7 +574,7 @@ async function heap_sort() {
         await new Promise(r => setTimeout(r, delay));
 
         draw();
-        
+
         if (largest !== i) {
             if (!is_sorting) {
                 draw();
@@ -621,41 +630,42 @@ async function heap_sort() {
     sort_end();
 }
 
-document.getElementById("debug").addEventListener("click", () => {
-    // Create an AudioContext
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+if (btn_debug != null) {
+    btn_debug.addEventListener("click", () => {
+        // Create an AudioContext
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-    // Function to generate a random 8-bit sound for 10ms
-    function playRandom8BitSound() {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+        // Function to generate a random 8-bit sound for 10ms
+        function playRandom8BitSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
 
-        oscillator.type = 'square'; // 8-bit-like square wave
-        oscillator.frequency.setValueAtTime(
-            Math.random() * 2000 + 500, // Random frequency between 500 and 2500 Hz
-            audioContext.currentTime
-        );
+            oscillator.type = 'square'; // 8-bit-like square wave
+            oscillator.frequency.setValueAtTime(
+                Math.random() * 2000 + 500, // Random frequency between 500 and 2500 Hz
+                audioContext.currentTime
+            );
 
-        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Set the volume
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime); // Set the volume
 
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
 
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.01); // Play for 10ms
-    }
-
-    // Function to play a burst of random 8-bit sounds
-    function playBurstOfSounds(burstLength) {
-        for (let i = 0; i < burstLength; i++) {
-            setTimeout(playRandom8BitSound, i * 15); // Play a sound every 15ms
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.01); // Play for 10ms
         }
-    }
 
-    // Call the function to play a burst of 8-bit sounds (adjust the burst length as needed)
-    playBurstOfSounds(100); // Play 10 random sounds
+        // Function to play a burst of random 8-bit sounds
+        function playBurstOfSounds(burstLength) {
+            for (let i = 0; i < burstLength; i++) {
+                setTimeout(playRandom8BitSound, i * 15); // Play a sound every 15ms
+            }
+        }
 
-});
+        // Call the function to play a burst of 8-bit sounds (adjust the burst length as needed)
+        playBurstOfSounds(100); // Play 10 random sounds
+
+    });
+}
 
 window.addEventListener("load", onload);
-

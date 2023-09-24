@@ -11,3 +11,7 @@
 #sliders > div {
   margin-right: 10px;
 }
+
+:root {
+  font: 16px sans-serif;
+}
